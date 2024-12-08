@@ -1,5 +1,7 @@
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -33,5 +35,23 @@ public class Database {
         }
         return false;
     }
+
+    public void showTables() {
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            ResultSet tables = metaData.getTables(null, null, "%", new String[]{"TABLE"});
+            
+            System.out.println("\nTables in the database:");
+            System.out.println("----------------------");
+            while (tables.next()) {
+                String tableName = tables.getString("TABLE_NAME");
+                System.out.println(tableName);
+            }
+            System.out.println("----------------------");
+        } catch (SQLException e) {
+            System.out.println("Error getting tables: " + e.getMessage());
+        }
+    }
+
 
 }
