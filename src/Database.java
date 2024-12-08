@@ -53,5 +53,60 @@ public class Database {
         }
     }
 
+    public ResultSet getTopPlayers() throws SQLException {
+        String query = "SELECT username, total_wins FROM players ORDER BY total_wins DESC LIMIT 10";
+        return connection.createStatement().executeQuery(query);
+    }
 
+    public void updateWinner(String playerName) {
+        try {
+            // Check if player exists
+            String checkQuery = "SELECT player_id FROM players WHERE username = ?";
+            var checkStmt = connection.prepareStatement(checkQuery);
+            checkStmt.setString(1, playerName);
+            var result = checkStmt.executeQuery();
+
+            if (result.next()) {
+                // Update existing player
+                String updateQuery = "UPDATE players SET total_wins = total_wins + 1, total_games = total_games + 1 WHERE username = ?";
+                var updateStmt = connection.prepareStatement(updateQuery);
+                updateStmt.setString(1, playerName);
+                updateStmt.executeUpdate();
+            } else {
+                // Insert new player
+                String insertQuery = "INSERT INTO players (username, total_wins, total_games) VALUES (?, 1, 1)";
+                var insertStmt = connection.prepareStatement(insertQuery);
+                insertStmt.setString(1, playerName);
+                insertStmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error updating winner: " + e.getMessage());
+        }
+    }
+
+    public void updateLoser(String playerName) {
+        try {
+            // Check if player exists
+            String checkQuery = "SELECT player_id FROM players WHERE username = ?";
+            var checkStmt = connection.prepareStatement(checkQuery);
+            checkStmt.setString(1, playerName);
+            var result = checkStmt.executeQuery();
+
+            if (result.next()) {
+                // Update existing player
+                String updateQuery = "UPDATE players SET total_games = total_games + 1 WHERE username = ?";
+                var updateStmt = connection.prepareStatement(updateQuery);
+                updateStmt.setString(1, playerName);
+                updateStmt.executeUpdate();
+            } else {
+                // Insert new player
+                String insertQuery = "INSERT INTO players (username, total_wins, total_games) VALUES (?, 0, 1)";
+                var insertStmt = connection.prepareStatement(insertQuery);
+                insertStmt.setString(1, playerName);
+                insertStmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error updating loser: " + e.getMessage());
+        }
+    }
 }
