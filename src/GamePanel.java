@@ -1,9 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
-public class  GamePanel extends JPanel implements ActionListener {
+public class GamePanel extends JPanel implements ActionListener {
     private static final int PANEL_WIDTH = 800;
     private static final int PANEL_HEIGHT = 600;
     private static final int DELAY = 100; // Movement delay in milliseconds
@@ -14,8 +16,9 @@ public class  GamePanel extends JPanel implements ActionListener {
     private Database db;
     private long startTime;
     private boolean gameOver;
+    private List<Rectangle> walls;
 
-    public GamePanel(String player1Name, Color player1Color, String player2Name, Color player2Color) {
+    public GamePanel(String player1Name, Color player1Color, String player2Name, Color player2Color, String levelFile) {
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         setBackground(Color.BLACK);
         setFocusable(true);
@@ -29,6 +32,14 @@ public class  GamePanel extends JPanel implements ActionListener {
 
         // Initialize database connection
         db = new Database();
+
+        // Load level
+        try {
+            walls = LevelLoader.loadLevel(levelFile, PANEL_WIDTH, PANEL_HEIGHT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            walls = new ArrayList<>();
+        }
 
         // Start game timer
         timer = new Timer(DELAY, this);
@@ -76,6 +87,12 @@ public class  GamePanel extends JPanel implements ActionListener {
         drawPlayerTrace(g2d, player1);
         drawPlayerTrace(g2d, player2);
 
+        // Draw walls
+        g2d.setColor(Color.GRAY);
+        for (Rectangle wall : walls) {
+            g2d.fill(wall);
+        }
+
         // Draw game time
         g2d.setColor(Color.WHITE);
         g2d.drawString("Time: " + getGameTime() + "s", 10, 20);
@@ -121,13 +138,13 @@ public class  GamePanel extends JPanel implements ActionListener {
 
     private void checkCollisions() {
         // Check boundary collisions
-        if (player1.getX() < 0 || player1.getX() >= PANEL_WIDTH || 
-            player1.getY() < 0 || player1.getY() >= PANEL_HEIGHT) {
+        if (player1.getX() < 0 || player1.getX() >= PANEL_WIDTH ||
+                player1.getY() < 0 || player1.getY() >= PANEL_HEIGHT) {
             player1.setAlive(false);
             endGame(player2);
         }
-        if (player2.getX() < 0 || player2.getX() >= PANEL_WIDTH || 
-            player2.getY() < 0 || player2.getY() >= PANEL_HEIGHT) {
+        if (player2.getX() < 0 || player2.getX() >= PANEL_WIDTH ||
+                player2.getY() < 0 || player2.getY() >= PANEL_HEIGHT) {
             player2.setAlive(false);
             endGame(player1);
         }
@@ -135,11 +152,23 @@ public class  GamePanel extends JPanel implements ActionListener {
         // Check trace collisions
         checkTraceCollision(player1, player2);
         checkTraceCollision(player2, player1);
+
+        // Check wall collisions
+        for (Rectangle wall : walls) {
+            if (wall.contains(player1.getX(), player1.getY())) {
+                player1.setAlive(false);
+                endGame(player2);
+            }
+            if (wall.contains(player2.getX(), player2.getY())) {
+                player2.setAlive(false);
+                endGame(player1);
+            }
+        }
     }
 
     private void checkTraceCollision(Player player, Player opponent) {
         Point currentPos = new Point(player.getX(), player.getY());
-        
+
         // Check collision with own trace (excluding current position)
         ArrayList<Point> playerTrace = player.getTrace();
         for (int i = 0; i < playerTrace.size() - 1; i++) {
@@ -164,11 +193,11 @@ public class  GamePanel extends JPanel implements ActionListener {
     private void endGame(Player winner) {
         gameOver = true;
         timer.stop();
-        
+
         // Update database with game results
         db.updateWinner(winner.getName());
         db.updateLoser(winner == player1 ? player2.getName() : player1.getName());
-        
+
         // Show game over dialog
         String message = winner.getName() + " wins!";
         JOptionPane.showMessageDialog(this, message, "Game Over", JOptionPane.INFORMATION_MESSAGE);
@@ -182,11 +211,11 @@ public class  GamePanel extends JPanel implements ActionListener {
         // Reset game state
         gameOver = false;
         startTime = System.currentTimeMillis();
-        
+
         // Reset players
         player1 = new Player(player1.getName(), player1.getTraceColor(), 200, 300, 1);
         player2 = new Player(player2.getName(), player2.getTraceColor(), 600, 300, 3);
-        
+
         // Restart timer
         timer.start();
         repaint();

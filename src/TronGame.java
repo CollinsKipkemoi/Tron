@@ -11,13 +11,13 @@ public class TronGame extends JFrame {
         super("Tron Light Cycle Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         db = new Database();
-        
+
         // Create menu bar
         createMenuBar();
-        
+
         // Start new game
         startNewGame();
-        
+
         pack();
         setLocationRelativeTo(null);
         setResizable(false);
@@ -26,21 +26,21 @@ public class TronGame extends JFrame {
     private void createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         JMenu gameMenu = new JMenu("Menu");
-        
+
         JMenuItem newGame = new JMenuItem("New Game");
         newGame.addActionListener(e -> startNewGame());
-        
+
         JMenuItem highScores = new JMenuItem("High Scores");
         highScores.addActionListener(e -> showHighScores());
-        
+
         JMenuItem exit = new JMenuItem("Exit");
         exit.addActionListener(e -> System.exit(0));
-        
+
         gameMenu.add(newGame);
         gameMenu.add(highScores);
         gameMenu.addSeparator();
         gameMenu.add(exit);
-        
+
         menuBar.add(gameMenu);
         setJMenuBar(menuBar);
     }
@@ -49,21 +49,26 @@ public class TronGame extends JFrame {
         // Get player names and colors
         String player1Name = JOptionPane.showInputDialog(this, "Enter Player 1 name:", "Player Setup", JOptionPane.QUESTION_MESSAGE);
         if (player1Name == null) return;
-        
+
         String player2Name = JOptionPane.showInputDialog(this, "Enter Player 2 name:", "Player Setup", JOptionPane.QUESTION_MESSAGE);
         if (player2Name == null) return;
-        
+
         Color player1Color = JColorChooser.showDialog(this, "Choose Player 1 Color", Color.BLUE);
         if (player1Color == null) player1Color = Color.BLUE;
-        
+
         Color player2Color = JColorChooser.showDialog(this, "Choose Player 2 Color", Color.RED);
         if (player2Color == null) player2Color = Color.RED;
+
+        // Choose level
+        String[] levels = {"level1.txt", "level2.txt", "level3.txt", "level4.txt", "level5.txt", "level6.txt", "level7.txt", "level8.txt", "level9.txt", "level10.txt"};
+        String levelFile = (String) JOptionPane.showInputDialog(this, "Choose Level:", "Level Selection", JOptionPane.QUESTION_MESSAGE, null, levels, levels[0]);
+        if (levelFile == null) return;
 
         // Create new game panel
         if (gamePanel != null) {
             remove(gamePanel);
         }
-        gamePanel = new GamePanel(player1Name, player1Color, player2Name, player2Color);
+        gamePanel = new GamePanel(player1Name, player1Color, player2Name, player2Color, "levels/" + levelFile);
         add(gamePanel);
         pack();
     }
@@ -72,17 +77,17 @@ public class TronGame extends JFrame {
         try {
             ResultSet scores = db.getTopPlayers();
             StringBuilder scoreText = new StringBuilder("Top 10 Players:\n\n");
-            
+
             while (scores.next()) {
                 String name = scores.getString("username");
                 int wins = scores.getInt("total_wins");
                 scoreText.append(String.format("%s: %d wins\n", name, wins));
             }
-            
+
             JOptionPane.showMessageDialog(this, scoreText.toString(), "High Scores", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error loading high scores: " + e.getMessage(), 
-                                        "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading high scores: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
