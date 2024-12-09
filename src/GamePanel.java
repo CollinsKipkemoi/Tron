@@ -17,8 +17,9 @@ public class GamePanel extends JPanel implements ActionListener {
     private long startTime;
     private boolean gameOver;
     private List<Rectangle> walls;
+    private String levelName;
 
-    public GamePanel(String player1Name, Color player1Color, String player2Name, Color player2Color, String levelFile) {
+    public GamePanel(String player1Name, Color player1Color, String player2Name, Color player2Color, String levelFile, String levelName) {
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         setBackground(Color.BLACK);
         setFocusable(true);
@@ -40,6 +41,9 @@ public class GamePanel extends JPanel implements ActionListener {
             e.printStackTrace();
             walls = new ArrayList<>();
         }
+
+        // Set level name
+        this.levelName = levelName;
 
         // Start game timer
         timer = new Timer(DELAY, this);
@@ -96,6 +100,9 @@ public class GamePanel extends JPanel implements ActionListener {
         // Draw game time
         g2d.setColor(Color.WHITE);
         g2d.drawString("Time: " + getGameTime() + "s", 10, 20);
+
+        // Draw level name
+        g2d.drawString(levelName, PANEL_WIDTH - 100, 20);
 
         if (gameOver) {
             drawGameOver(g2d);

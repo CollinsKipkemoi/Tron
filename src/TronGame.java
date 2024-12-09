@@ -60,15 +60,16 @@ public class TronGame extends JFrame {
         if (player2Color == null) player2Color = Color.RED;
 
         // Choose level
-        String[] levels = {"level1.txt", "level2.txt", "level3.txt", "level4.txt", "level5.txt", "level6.txt", "level7.txt", "level8.txt", "level9.txt", "level10.txt"};
-        String levelFile = (String) JOptionPane.showInputDialog(this, "Choose Level:", "Level Selection", JOptionPane.QUESTION_MESSAGE, null, levels, levels[0]);
-        if (levelFile == null) return;
+        String[] levels = {"Level 1", "Level 2", "Level 3", "Level 4", "Level 5", "Level 6", "Level 7", "Level 8", "Level 9", "Level 10"};
+        String levelChoice = (String) JOptionPane.showInputDialog(this, "Choose Level:", "Level Selection", JOptionPane.QUESTION_MESSAGE, null, levels, levels[0]);
+        if (levelChoice == null) return;
+        String levelFile = "levels/" + levelChoice.toLowerCase().replace(" ", "") + ".txt";
 
         // Create new game panel
         if (gamePanel != null) {
             remove(gamePanel);
         }
-        gamePanel = new GamePanel(player1Name, player1Color, player2Name, player2Color, "levels/" + levelFile);
+        gamePanel = new GamePanel(player1Name, player1Color, player2Name, player2Color, levelFile, levelChoice);
         add(gamePanel);
         pack();
     }
