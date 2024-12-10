@@ -5,7 +5,7 @@ public class Player {
     private String name;
     private Color traceColor;
     private int x, y;
-    private int direction; // 0: up, 1: right, 2: down, 3: left
+    private int direction;
     private ArrayList<Point> trace;
     private boolean alive;
 
@@ -22,17 +22,16 @@ public class Player {
 
     public void move() {
         switch (direction) {
-            case 0: y -= 1; break; // Up
-            case 1: x += 1; break; // Right
-            case 2: y += 1; break; // Down
-            case 3: x -= 1; break; // Left
+            case 0: y -= 1; break;
+            case 1: x += 1; break;
+            case 2: y += 1; break;
+            case 3: x -= 1; break;
         }
         trace.add(new Point(x, y));
     }
 
     public void setDirection(int newDirection) {
-        // Prevent 180-degree turns
-        if (Math.abs(direction - newDirection) != 2) {
+        if (Math.abs(newDirection - direction) != 2) {
             direction = newDirection;
         }
     }

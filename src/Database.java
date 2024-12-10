@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -60,53 +61,46 @@ public class Database {
 
     public void updateWinner(String playerName) {
         try {
-            // Check if player exists
-            String checkQuery = "SELECT player_id FROM players WHERE username = ?";
-            var checkStmt = connection.prepareStatement(checkQuery);
-            checkStmt.setString(1, playerName);
-            var result = checkStmt.executeQuery();
+            PreparedStatement stmt = connection.prepareStatement(
+                "SELECT * FROM players WHERE username = ?"
+            );
+            stmt.setString(1, playerName);
+            ResultSet rs = stmt.executeQuery();
 
-            if (result.next()) {
-                // Update existing player
-                String updateQuery = "UPDATE players SET total_wins = total_wins + 1, total_games = total_games + 1 WHERE username = ?";
-                var updateStmt = connection.prepareStatement(updateQuery);
-                updateStmt.setString(1, playerName);
-                updateStmt.executeUpdate();
+            if (rs.next()) {
+                stmt = connection.prepareStatement(
+                    "UPDATE players SET total_wins = total_wins + 1 WHERE username = ?"
+                );
+                stmt.setString(1, playerName);
             } else {
-                // Insert new player
-                String insertQuery = "INSERT INTO players (username, total_wins, total_games) VALUES (?, 1, 1)";
-                var insertStmt = connection.prepareStatement(insertQuery);
-                insertStmt.setString(1, playerName);
-                insertStmt.executeUpdate();
+                stmt = connection.prepareStatement(
+                    "INSERT INTO players (username, total_wins) VALUES (?, 1)"
+                );
+                stmt.setString(1, playerName);
             }
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error updating winner: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void updateLoser(String playerName) {
         try {
-            // Check if player exists
-            String checkQuery = "SELECT player_id FROM players WHERE username = ?";
-            var checkStmt = connection.prepareStatement(checkQuery);
-            checkStmt.setString(1, playerName);
-            var result = checkStmt.executeQuery();
+            PreparedStatement stmt = connection.prepareStatement(
+                "SELECT * FROM players WHERE username = ?"
+            );
+            stmt.setString(1, playerName);
+            ResultSet rs = stmt.executeQuery();
 
-            if (result.next()) {
-                // Update existing player
-                String updateQuery = "UPDATE players SET total_games = total_games + 1 WHERE username = ?";
-                var updateStmt = connection.prepareStatement(updateQuery);
-                updateStmt.setString(1, playerName);
-                updateStmt.executeUpdate();
-            } else {
-                // Insert new player
-                String insertQuery = "INSERT INTO players (username, total_wins, total_games) VALUES (?, 0, 1)";
-                var insertStmt = connection.prepareStatement(insertQuery);
-                insertStmt.setString(1, playerName);
-                insertStmt.executeUpdate();
+            if (!rs.next()) {
+                stmt = connection.prepareStatement(
+                    "INSERT INTO players (username, total_wins) VALUES (?, 0)"
+                );
+                stmt.setString(1, playerName);
+                stmt.executeUpdate();
             }
         } catch (SQLException e) {
-            System.out.println("Error updating loser: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
