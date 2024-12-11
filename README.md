@@ -3,6 +3,9 @@
 ## Overview
 Tron Game is a two-player game inspired by the classic arcade game Tron. Players control light cycles that leave a trail behind them. The objective is to avoid crashing into walls, the opponent's trail, or your own trail.
 
+## Screenshot
+![Game GUI](GUI.png)
+
 ## Features
 - Two-player mode
 - Customizable player names and colors
@@ -52,3 +55,5 @@ The game tracks the top 10 players based on the number of wins. You can view the
 ## Acknowledgements
 - Inspired by the classic Tron arcade game.
 - Developed as part of an assignment for Programming Technology course.
+
+
